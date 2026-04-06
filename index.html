@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>⚡ NEO·CYBERSPHERE | ADVANCED HACKER INTERFACE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #000000;
+            overflow: hidden;
+            font-family: 'Share Tech Mono', 'Fira Code', 'Courier New', monospace;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        /* Enhanced Matrix Rain Background */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.28;
+            pointer-events: none;
+        }
+
+        /* Glowing scanline overlay */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,255,0,0.03) 0px, rgba(0,255,0,0.03) 2px, transparent 2px, transparent 6px);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* Split Layout */
+        .split-layout {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            backdrop-filter: blur(2px);
+        }
+
+        /* LEFT PANEL - HYPER TERMINAL */
+        .terminal-panel {
+            flex: 1.25;
+            background: rgba(0, 8, 12, 0.82);
+            border-right: 2px solid #0f0;
+            box-shadow: 12px 0 30px rgba(0, 255, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(4px);
+        }
+
+        .terminal-header {
+            padding: 18px 22px;
+            background: rgba(0, 25, 10, 0.9);
+            border-bottom: 1px solid #0f0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-shadow: 0 0 8px #0f0, 0 0 2px #0a0;
+            color: #0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .log-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 16px;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+            color: #b4ffb4;
+            background: rgba(0, 0, 0, 0.65);
+            scroll-behavior: smooth;
+        }
+
+        .log-line {
+            border-left: 3px solid #0f0;
+            padding-left: 12px;
+            margin-bottom: 10px;
+            animation: glitchEntry 0.22s ease-out;
+            word-break: break-word;
+            font-size: 0.8rem;
+            line-height: 1.35;
+            transition: 0.1s;
+        }
+
+        @keyframes glitchEntry {
+            0% { opacity: 0; transform: translateX(-12px); text-shadow: 0 0 5px red; }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* RIGHT PANEL - UPGRADED */
+        .system-panel {
+            flex: 0.95;
+            background: rgba(2, 10, 8, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 18px;
+            gap: 20px;
+        }
+
+        /* NEON STAT CARDS */
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: space-between;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #021a0f, #001005);
+            border: 1px solid #0f0;
+            border-radius: 16px;
+            padding: 12px;
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+            box-shadow: 0 0 14px rgba(0, 255, 0, 0.4);
+            transition: all 0.2s;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #8cf78c;
+            letter-spacing: 1.5px;
+        }
+
+        .stat-value {
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: #0f0;
+            text-shadow: 0 0 8px #0f0;
+        }
+
+        .progress-bar-bg {
+            background: #0a2a1a;
+            border-radius: 12px;
+            height: 8px;
+            width: 100%;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #0f0, #8eff8e);
+            box-shadow: 0 0 8px #0f0;
+            transition: width 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        /* WORLD MAP CONTAINER - IMMERSIVE */
+        .map-container {
+            background: #000b0c;
+            border: 1px solid #0f0;
+            border-radius: 24px;
+            padding: 10px;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.35);
+            transition: 0.2s;
+        }
+
+        .map-title {
+            color: #0f0;
+            font-size: 0.75rem;
+            margin-bottom: 10px;
+            text-align: center;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        canvas#worldCanvas {
+            width: 100%;
+            background: radial-gradient(circle at 20% 30%, #011010, #000000);
+            border-radius: 16px;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .location-label {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #b3ffb3;
+            background: rgba(0, 30, 0, 0.7);
+            padding: 6px;
+            border-radius: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            backdrop-filter: blur(2px);
+        }
+
+        /* TOUCH CONTROLS */
+        .speed-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .ctrl-btn {
+            background: #0a1f0e;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 10px 22px;
+            border-radius: 60px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 0 6px #0f0;
+            font-size: 0.8rem;
+        }
+
+        .ctrl-btn:active {
+            background: #0f0;
+            color: black;
+            transform: scale(0.94);
+            box-shadow: 0 0 18px #0f0;
+        }
+
+        /* custom scroll */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #021a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 750px) {
+            .stat-value { font-size: 1.2rem; }
+            .log-line { font-size: 0.68rem; }
+            .ctrl-btn { padding: 6px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+<div class="scanline"></div>
+
+<div class="split-layout">
+    <!-- LEFT TERMINAL: ADVANCED LOGS -->
+    <div class="terminal-panel">
+        <div class="terminal-header">
+            <span>⚡ ROOT@DARKMATRIX:~#</span>
+            <span style="font-size:0.7rem;">[🔓 ACCESS: GRANTED]</span>
+        </div>
+        <div class="log-container" id="logArea">
+            <div class="log-line">> 🧬 CYBERSPHERE v3.0 BOOT</div>
+            <div class="log-line">> 🔐 ESTABLISHING TOR + VPN CHAIN (7 hops)</div>
+            <div class="log-line">> 🛡️ KERNEL MODULES LOADED | FIREWALL BYPASS ACTIVE</div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: LIVE STATS + GLOBAL MAP + REAL/FAKE MIX -->
+    <div class="system-panel">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">🔥 CPU LOAD</div><div class="stat-value" id="cpuVal">0%</div><div class="progress-bar-bg"><div class="progress-fill" id="cpuFill"></div></div></div>
+            <div class="stat-card"><div class="stat-label">🧠 RAM USAGE</div><div class="stat-value" id="ramVal">0%</div><div class="progress-bar-bg"><div class="progress-fill" id="ramFill"></div></div></div>
+            <div class="stat-card"><div class="stat-label">📡 NETWORK</div><div class="stat-value" id="netVal">0 Mb/s</div><div class="progress-bar-bg"><div class="progress-fill" id="netFill"></div></div></div>
+        </div>
+
+        <!-- GLOBAL MAP WITH GLOWING NODES & LINES -->
+        <div class="map-container">
+            <div class="map-title">🌐 LIVE GLOBAL CYBER ATTACK MAP</div>
+            <canvas id="worldCanvas" width="700" height="280" style="width:100%; height:auto;"></canvas>
+            <div class="location-label" id="mapStatus">🌀 scanning darknet relays...</div>
+        </div>
+
+        <!-- FAKE FILE SCAN + REAL DEVICE INFO MIX -->
+        <div class="stat-card" style="padding: 10px;">
+            <div class="stat-label">💣 DEEP FILE SYSTEM SCAN (FORENSIC)</div>
+            <div class="progress-bar-bg"><div class="progress-fill" id="deepScanFill" style="width:0%"></div></div>
+            <div style="font-size:0.7rem; margin-top:8px;" id="scanDetails">⚡ initializing stealth scan...</div>
+        </div>
+
+        <!-- REAL-TIME DEVICE FINGERPRINT + FAKE IP -->
+        <div class="stat-card" style="background:#010f0b;">
+            <div class="stat-label">🕵️ REAL/FUSION DATA</div>
+            <div id="deviceReal" style="font-size:0.7rem; color:#b4ffb4;">⏳ loading device stats...</div>
+            <div id="fakeIpGen" style="font-size:0.7rem; color:#6eff6e; margin-top:4px;">🌐 spoofed IP: 0.0.0.0</div>
+            <div id="randomAlert" style="font-size:0.65rem; color:#d4ff4e; margin-top:5px;"></div>
+        </div>
+
+        <div class="speed-controls">
+            <div class="ctrl-btn" id="decelerateBtn">🐢 DECELERATE</div>
+            <div class="ctrl-btn" id="accelerateBtn">🐇 ACCELERATE</div>
+            <div class="ctrl-btn" id="purgeLogsBtn">🗑️ PURGE LOGS</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // -------------------------- ENHANCED MATRIX RAIN -------------------------
+        const matrixCanvas = document.getElementById('matrix-canvas');
+        let mCtx = matrixCanvas.getContext('2d');
+        let matrixSymbols = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEF@#$%^&*()_+[]{}";
+        let fontSize = 18;
+        let columns, drops = [];
+        
+        function resizeMatrixRain() {
+            matrixCanvas.width = window.innerWidth;
+            matrixCanvas.height = window.innerHeight;
+            columns = Math.floor(matrixCanvas.width / fontSize);
+            drops = [];
+            for (let i = 0; i < columns; i++) drops.push(Math.random() * -120);
+        }
+        
+        function drawMatrixRain() {
+            mCtx.fillStyle = "rgba(0, 0, 0, 0.045)";
+            mCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+            mCtx.fillStyle = "#0c8";
+            mCtx.font = `bold ${fontSize}px monospace`;
+            for (let i = 0; i < drops.length; i++) {
+                let char = matrixSymbols[Math.floor(Math.random() * matrixSymbols.length)];
+                mCtx.fillText(char, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+            requestAnimationFrame(drawMatrixRain);
+        }
+        window.addEventListener('resize', () => { resizeMatrixRain(); });
+        resizeMatrixRain();
+        drawMatrixRain();
+        
+        // ------------------------ ADVANCED LOG GENERATOR (AI-style variety) -----------------
+        const hackCategories = {
+            network: ["🌐 SYN flood → target 45.77.12.x", "🌐 DNS tunneling active", "🌐 IPv6 leak detected, rerouting", "🌐 WiFi deauth injection", "🌐 TCP window scaling exploit"],
+            security: ["🔓 Kerberos golden ticket forged", "🔓 LSASS memory dump extracted", "🔓 CVE-2025-2190 RCE triggered", "🔓 UAC bypass via CMSTP", "🔓 Windows Defender exclusion added"],
+            encryption: ["🔑 AES-256-GCM key recovered", "🔑 RSA private factorization attempt", "🔑 OpenSSL padding oracle success", "🔑 ChaCha20 nonce reuse exploited", "🔑 BitLocker TPM bypass"],
+            database: ["🗄️ MongoDB injection: 25k records", "🗄️ PostgreSQL RCE via COPY", "🗄️ Redis keyspace notification hijack", "🗄️ Elasticsearch data exfiltration", "🗄️ MySQL UDF sys_exec() loaded"],
+            exploit: ["💥 Heap spray + ROP chain", "💥 Reflective DLL injection", "💥 process hollowing on lsass.exe", "💥 EternalBlue-like SMB exploit", "💥 Cobalt Strike beacon (stageless)"],
+            zeroday: ["⚡ 0-day: kernel pointer leak", "⚡ Chrome v8 JIT spray", "⚡ PrintNightmare variant", "⚡ ProxyShell chain active", "⚡ Log4j JNDI RCE (CVE-2021-44228)"]
+        };
+        
+        let logHistory = new Set();
+        let lastCat = "";
+        
+        function freshHackLog() {
+            let allEntries = [];
+            for (let cat in hackCategories) {
+                hackCategories[cat].forEach(msg => { allEntries.push({ cat, msg }); });
+            }
+            let available = allEntries.filter(entry => !logHistory.has(entry.cat + "||" + entry.msg));
+            if (available.length === 0) {
+                logHistory.clear();
+                available = allEntries;
+            }
+            let choice = available[Math.floor(Math.random() * available.length)];
+            logHistory.add(choice.cat + "||" + choice.msg);
+            let fakePort = Math.floor(Math.random() * 65535);
+            let randIP = `10.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+            return `> [${choice.cat.toUpperCase()}] ${choice.msg} | src=${randIP}:${fakePort} | [${new Date().toLocaleTimeString()}]`;
+        }
+        
+        const logContainer = document.getElementById('logArea');
+        let logSpeedMs = 780;
+        let logInterval;
+        
+        function injectLog() {
+            const newMsg = freshHackLog();
+            const logDiv = document.createElement('div');
+            logDiv.className = 'log-line';
+            logDiv.innerHTML = `<span style="color:#00ee88;">⤷</span> ${newMsg}`;
+            logContainer.appendChild(logDiv);
+            logDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            while (logContainer.children.length > 320) logContainer.removeChild(logContainer.firstChild);
+        }
+        
+        function restartLogLoop() {
+            if (logInterval) clearInterval(logInterval);
+            logInterval = setInterval(injectLog, logSpeedMs);
+        }
+        
+        function setNewSpeed(delta) {
+            let newSpd = logSpeedMs + delta;
+            if (newSpd < 210) newSpd = 210;
+            if (newSpd > 2700) newSpd = 2700;
+            logSpeedMs = newSpd;
+            restartLogLoop();
+        }
+        
+        // --------------- SYSTEM STATS WITH DYNAMIC GLOW -----------------
+        let cpuLoad = 14, ramLoad = 32, netLoad = 4.5;
+        function animateStats() {
+            cpuLoad = Math.min(97, Math.max(3, cpuLoad + (Math.random() - 0.5) * 11));
+            ramLoad = Math.min(93, Math.max(12, ramLoad + (Math.random() - 0.5) * 8));
+            netLoad = Math.min(94, Math.max(1.2, netLoad + (Math.random() - 0.5) * 7));
+            document.getElementById('cpuVal').innerText = Math.floor(cpuLoad) + "%";
+            document.getElementById('ramVal').innerText = Math.floor(ramLoad) + "%";
+            document.getElementById('netVal').innerText = netLoad.toFixed(1) + " Mb/s";
+            document.getElementById('cpuFill').style.width = cpuLoad + "%";
+            document.getElementById('ramFill').style.width = ramLoad + "%";
+            let netPercent = Math.min(100, (netLoad / 85) * 100);
+            document.getElementById('netFill').style.width = netPercent + "%";
+        }
+        setInterval(animateStats, 680);
+        
+        // --------------- FAKE FILE SCAN (MIXED REAL/FEEL) -----------------
+        let deepScan = 0;
+        let scanTimer;
+        function runDeepScan() {
+            if (scanTimer) clearInterval(scanTimer);
+            deepScan = 0;
+            document.getElementById('deepScanFill').style.width = "0%";
+            document.getElementById('scanDetails').innerHTML = "📂 scanning /etc, /var/log, encrypted volumes...";
+            scanTimer = setInterval(() => {
+                deepScan += Math.random() * 10 + 1;
+                if (deepScan >= 100) {
+                    deepScan = 100;
+                    document.getElementById('deepScanFill').style.width = "100%";
+                    document.getElementById('scanDetails').innerHTML = "✅ [DONE] 22,814 files analyzed. 3 suspicious hashes (false flags).";
+                    clearInterval(scanTimer);
+                    setTimeout(runDeepScan, 17000);
+                } else {
+                    document.getElementById('deepScanFill').style.width = deepScan + "%";
+                    if (deepScan > 40 && deepScan < 65) document.getElementById('scanDetails').innerHTML = "⚠️ hidden .key file found | decrypting entropy...";
+                    else if (deepScan > 70) document.getElementById('scanDetails').innerHTML = "🧬 extracting browser artifacts & cookies...";
+                    else document.getElementById('scanDetails').innerHTML = `🔍 scanning sectors... ${Math.floor(deepScan)}%`;
+                }
+            }, 380);
+        }
+        runDeepScan();
+        
+        // ---------------- REAL DEVICE MIX (battery, time, browser + fake randomness) --------------
+        function getRealDeviceMix() {
+            let now = new Date();
+            let timeStr = now.toLocaleTimeString();
+            let browser = (navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)/) || ["Unknown"])[0];
+            let platform = navigator.platform || "unknown";
+            if (navigator.getBattery) {
+                navigator.getBattery().then(batt => {
+                    let level = Math.floor(batt.level * 100);
+                    document.getElementById('deviceReal').innerHTML = `🔋 ${level}% | 🕒 ${timeStr} | 🌐 ${browser} | ${platform}`;
+                }).catch(() => {
+                    document.getElementById('deviceReal').innerHTML = `🔋 N/A | 🕒 ${timeStr} | 🌐 ${browser}`;
+                });
+            } else {
+                document.getElementById('deviceReal').innerHTML = `⏱️ ${timeStr} | 🌐 ${browser} | ${platform} (battery API unavailable)`;
+            }
+            let fakeIP = `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+            document.getElementById('fakeIpGen').innerHTML = `🌐 SPOOFED IP: ${fakeIP} (TOR exit node)`;
+            let alerts = ["[ALERT] IDS signature mismatch", "[INFO] beacon interval randomized", "[WARN] potential sandbox detection", "[OK] encrypted channel stable"];
+            document.getElementById('randomAlert').innerHTML = alerts[Math.floor(Math.random() * alerts.length)];
+        }
+        setInterval(getRealDeviceMix, 2100);
+        getRealDeviceMix();
+        
+        // --------------------------- UPGRADED WORLD MAP (GLOWING NODES, REALISTIC LINES, PULSES) ----------
+        const worldCanvas = document.getElementById('worldCanvas');
+        const wCtx = worldCanvas.getContext('2d');
+        let mapWidth = 700, mapHeight = 280;
+        
+        function resizeWorldMap() {
+            const containerRect = worldCanvas.parentElement.getBoundingClientRect();
+            worldCanvas.width = containerRect.width - 20;
+            worldCanvas.height = 240;
+            mapWidth = worldCanvas.width;
+            mapHeight = worldCanvas.height;
+            drawMapBackground();
+        }
+        
+        const cyberCities = [
+            { name: "🇺🇸 WASHINGTON DC", lat: 38.9072, lon: -77.0369 }, { name: "🇷🇺 MOSCOW", lat: 55.7558, lon: 37.6173 },
+            { name: "🇨🇳 BEIJING", lat: 39.9042, lon: 116.4074 }, { name: "🇮🇳 NEW DELHI", lat: 28.6139, lon: 77.2090 },
+            { name: "🇬🇧 LONDON", lat: 51.5074, lon: -0.1278 }, { name: "🇩🇪 BERLIN", lat: 52.5200, lon: 13.4050 },
+            { name: "🇯🇵 TOKYO", lat: 35.6895, lon: 139.6917 }, { name: "🇦🇺 SYDNEY", lat: -33.8688, lon: 151.2093 },
+            { name: "🇧🇷 SAO PAULO", lat: -23.5505, lon: -46.6333 }, { name: "🇿🇦 JOHANNESBURG", lat: -26.2041, lon: 28.0473 },
+            { name: "🇫🇷 PARIS", lat: 48.8566, lon: 2.3522 }, { name: "🇰🇷 SEOUL", lat: 37.5665, lon: 126.9780 }
+        ];
+        
+        function project(lat, lon) {
+            let x = (lon + 180) * (mapWidth / 360);
+            let y = (90 - lat) * (mapHeight / 180);
+            return { x, y };
+        }
+        
+        let activeAttacks = []; // { cityIndex, pulseScale, glowIntensity, life }
+        let connectionLines = []; // { from, to, life }
+        let lastTarget = null;
+        
+        function drawMapBackground() {
+            if (!wCtx) return;
+            wCtx.clearRect(0, 0, mapWidth, mapHeight);
+            wCtx.fillStyle = "#001010";
+            wCtx.fillRect(0, 0, mapWidth, mapHeight);
+            wCtx.strokeStyle = "#1c6b2f";
+            wCtx.lineWidth = 0.6;
+            for (let i = 0; i < mapWidth; i += 45) {
+                wCtx.beginPath();
+                wCtx.moveTo(i, 0);
+                wCtx.lineTo(i, mapHeight);
+                wCtx.stroke();
+                wCtx.beginPath();
+                wCtx.moveTo(0, i % mapHeight);
+                wCtx.lineTo(mapWidth, i % mapHeight);
+                wCtx.stroke();
+            }
+            // draw cities (base)
+            cyberCities.forEach((city, idx) => {
+                let { x, y } = project(city.lat, city.lon);
+                wCtx.beginPath();
+                wCtx.arc(x, y, 5, 0, 2*Math.PI);
+                wCtx.fillStyle = "#0f0";
+                wCtx.shadowBlur = 12;
+                wCtx.shadowColor = "#0f0";
+                wCtx.fill();
+                wCtx.fillStyle = "#aaffaa";
+                wCtx.font = "bold 9px monospace";
+                wCtx.shadowBlur = 2;
+                wCtx.fillText(city.name.slice(0,12), x-18, y-6);
+            });
+            wCtx.shadowBlur = 0;
+            // draw persistent connection lines
+            for (let conn of connectionLines) {
+                let fromCity = cyberCities[conn.from];
+                let toCity = cyberCities[conn.to];
+                if (fromCity && toCity) {
+                    let p1 = project(fromCity.lat, fromCity.lon);
+                    let p2 = project(toCity.lat, toCity.lon);
+                    wCtx.beginPath();
+                    wCtx.moveTo(p1.x, p1.y);
+                    wCtx.lineTo(p2.x, p2.y);
+                    wCtx.strokeStyle = `rgba(0, 255, 100, ${0.5 + conn.life * 0.3})`;
+                    wCtx.lineWidth = 2.2;
+                    wCtx.setLineDash([6, 8]);
+                    wCtx.stroke();
+                    wCtx.setLineDash([]);
+                }
+            }
+            // draw active attack pulses
+            for (let atk of activeAttacks) {
+                let city = cyberCities[atk.cityIndex];
+                if (city) {
+                    let { x, y } = project(city.lat, city.lon);
+                    let radius = 7 + (atk.pulseScale % 14);
+                    wCtx.beginPath();
+                    wCtx.arc(x, y, radius, 0, 2*Math.PI);
+                    wCtx.fillStyle = `rgba(0, 255, 0, ${0.6 - atk.glowIntensity * 0.2})`;
+                    wCtx.fill();
+                    wCtx.beginPath();
+                    wCtx.arc(x, y, 4, 0, 2*Math.PI);
+                    wCtx.fillStyle = "#baff0a";
+                    wCtx.fill();
+                }
+            }
+        }
+        
+        function updateMapCyberAttacks() {
+            // spawn random attack node
+            if (activeAttacks.length < 6 && Math.random() < 0.38) {
+                let randCity = Math.floor(Math.random() * cyberCities.length);
+                if (!activeAttacks.some(a => a.cityIndex === randCity)) {
+                    activeAttacks.push({ cityIndex: randCity, pulseScale: 0, glowIntensity: 1.0, life: 1 });
+                    if (lastTarget !== null && lastTarget !== randCity) {
+                        connectionLines.push({ from: lastTarget, to: randCity, life: 1.0 });
+                        if (connectionLines.length > 14) connectionLines.shift();
+                    }
+                    lastTarget = randCity;
+                    document.getElementById('mapStatus').innerHTML = `🔥 CYBER STRIKE → ${cyberCities[randCity].name} | data exfiltration`;
+                    setTimeout(() => {
+                        if(document.getElementById('mapStatus').innerHTML.includes("exfiltration"))
+                            document.getElementById('mapStatus').innerHTML = "🌀 monitoring darkweb relays...";
+                    }, 1900);
+                }
+            }
+            // update pulse & decay
+            for (let i = 0; i < activeAttacks.length; i++) {
+                activeAttacks[i].pulseScale = (activeAttacks[i].pulseScale + 1.8) % 16;
+                activeAttacks[i].glowIntensity -= 0.025;
+                if (activeAttacks[i].glowIntensity <= 0.1) {
+                    activeAttacks.splice(i,1);
+                    i--;
+                }
+            }
+            for (let i=0; i<connectionLines.length; i++) {
+                connectionLines[i].life -= 0.012;
+                if (connectionLines[i].life <= 0) {
+                    connectionLines.splice(i,1);
+                    i--;
+                }
+            }
+            drawMapBackground();
+            requestAnimationFrame(updateMapCyberAttacks);
+        }
+        
+        window.addEventListener('resize', () => { resizeWorldMap(); drawMapBackground(); });
+        resizeWorldMap();
+        updateMapCyberAttacks();
+        setInterval(() => drawMapBackground(), 400);
+        
+        // ---------------------- UI CONTROLS (touch ready) -------------------------
+        document.getElementById('accelerateBtn').addEventListener('click', () => setNewSpeed(-140));
+        document.getElementById('decelerateBtn').addEventListener('click', () => setNewSpeed(160));
+        document.getElementById('purgeLogsBtn').addEventListener('click', () => {
+            while (logContainer.children.length > 3) logContainer.removeChild(logContainer.lastChild);
+            injectLog();
+            injectLog();
+        });
+        
+        restartLogLoop();
+        
+        // final immersive message
+        console.log("⚡ CYBERSPHERE v3.0 ACTIVE | ADVANCED MAP & LOG SIMULATION");
+    })();
+</script>
+</body>
+</html>
